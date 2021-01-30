@@ -9,7 +9,10 @@ const staticFilesToPreCache = [
     "/index.html",
     "/style.css",
     "/index.js",
-    "/manifest.webmanifest",
+    "/manifest.json",
+    "/db.js",
+    "/icons/icon-192x192.png",
+    "/icons/icon-512x512.png"
 ].concat(iconFiles);
 
 self.addEventListener("install", function (event) {
@@ -39,8 +42,8 @@ self.addEventListener("activate", function (event) {
 });
 
 self.addEventListener("fetch", function(event) {
-    const {url} = event.request;
-    if (url.includes("/all") || url.includes("/find")) {
+    
+    if (event.request.url.includes ("/api")) {
         event.respondWith(
             caches.open(DATA_CACHE_NAME).then(cache => {
                 return fetch(event.request)
@@ -54,14 +57,16 @@ self.addEventListener("fetch", function(event) {
                     return cache.match(event.request);
                 });
             }).catch(err => console.log(err))
-        );
-    } else {
-        event.respondWith(
-            caches.open(CACHE_NAME).then(cache => {
-                return cache.match(event.request).then (res => {
-                    return res || fetch(event.request);
-                })
-            })
-        )
-    }
+        ); 
+        return;
+    } event.respondWith(fetch(event.request).catch(function() { 
+        return caches.match(event.request)
+        .then(function(response){
+            if (response) {return response}
+            else if (event.request.headers.get("accept").includes("text/html")){
+                return caches.match("/")
+            }
+        }); 
+    })
+);
 })
