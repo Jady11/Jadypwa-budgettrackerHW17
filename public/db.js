@@ -1,13 +1,20 @@
+// const indexedDB = 
+//     window.indexedDB ||
+//     window.mozIndexedDB ||
+//     window.webkitIndexedDB ||
+//     window.msIndexedDB||
+//     window.shimIndexedDB;
+
 let db;
 const request = indexedDB.open("budget", 1);
 
-request.onupgradeneeded = function (event) {
-    const db = event.target.result;
+request.onupgradeneeded = ({ target }) => {
+    let db = target.result;
     db.createObjectStore("pending", { AutoIncrement: true });
 };
 
-request.onsuccess = function (event) {
-    db = event.target.result;
+request.onsuccess = ({ target }) => {
+    db = target.result;
 
     if (navigator.onLine) {
         checkDatabase();
