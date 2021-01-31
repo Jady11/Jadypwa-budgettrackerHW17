@@ -16,7 +16,7 @@ SO THAT my account balance is accurate when I am traveling
     *LINKS
 
 #INSTALLATION:
-    Files populated through running 'npm install' and 'node' commands. Deploy mongo in terminal. Opening second terminal, run seed commands to seed database in Robo 3t, and spin up using npm start.  Navigate to locolhost:3000 in Browser.  This can alternately be deployed using the heroko link that can be found below.  
+   Deployed through heroko server.   
 
 
 #SCREEN SHOTS:
@@ -41,7 +41,7 @@ SO THAT my account balance is accurate when I am traveling
 
     heroku link: 
 
-    https://shrouded-oasis-14236.herokuapp.com
+   https://pacific-temple-74640.herokuapp.com/
 
 ## License 
 
