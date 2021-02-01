@@ -1,71 +1,54 @@
-const CACHE_NAME = "static-cache-v2";
+var CACHE_NAME = "my-site-cache-v1";
 const DATA_CACHE_NAME = "data-cache-v1";
-
-const iconSizes = ["192", "512"];
-const iconFiles = iconSizes.map((size) => `/icons/icon-${size}x${size}.png`);
-
-const staticFilesToPreCache = [
-    "/",
-    "/style.css",
-    "/index.js",
-    "/manifest.json",
-    "/db.js",
-    "/icons/icon-192x192.png",
-    "/icons/icon-512x512.png"
-].concat(iconFiles);
-
-self.addEventListener("install", function (event) {
-    event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-        console.log("Files pre-cached successfully");
-        return cache.addAll(staticFilesToPreCache);
+var urlsToCache = [
+  "/",
+  "/db.js",
+  "/index.js",
+  "/manifest.json",
+  "/styles.css",
+  "/icons/icon-192x192.png",
+  "/icons/icon-512x512.png"
+];
+self.addEventListener("install", function(event) {
+  // Perform install steps
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(function(cache) {
+      console.log("Opened cache");
+      return cache.addAll(urlsToCache);
     })
-    );
-    // self.skipWaiting();
+  );
 });
-
-// self.addEventListener("activate", function (event) {
-//     event.waitUntil(
-//         caches.keys().then((keyList) => {
-//         return Promise.all(
-//             keylist.map((key) => {
-//             if (key !== CACHE_NAME && KEY !== DATA_CACHE_NAME) {
-//                 console.log("Removing old cache data", key);
-//                 return caches.delete(key);
-//             }
-//             })
-//         );
-//         })
-//     );
-//     self.clients.claim();
-// });
-
 self.addEventListener("fetch", function(event) {
-    
-    if (event.request.url.includes ("/api")) {
-        event.respondWith(
-            caches.open(DATA_CACHE_NAME).then(cache => {
-                return fetch(event.request)
-                .then(res => {
-                    if(res.status === 200) {
-                        cache.put(event.request, response.clone());
-                    }
-                    return res;
-                })
-                .catch(err => {
-                    return cache.match(event.request);
-                });
-            }).catch(err => console.log(err))
-        ); 
-        return;
-    } event.respondWith(fetch(event.request).catch(function() { 
-        return caches.match(event.request)
-        .then(function(response){
-            if (response) {return response}
-            else if (event.request.headers.get("accept").includes("text/html")){
-                return caches.match("/")
+  // cache all get requests to /api routes
+  if (event.request.url.includes("/api/")) {
+    event.respondWith(
+      caches.open(DATA_CACHE_NAME).then(cache => {
+        return fetch(event.request)
+          .then(response => {
+            // If the response was good, clone it and store it in the cache.
+            if (response.status === 200) {
+              cache.put(event.request.url, response.clone());
             }
-        }); 
+            return response;
+          })
+          .catch(err => {
+            // Network request failed, try to get it from the cache.
+            return cache.match(event.request);
+          });
+      }).catch(err => console.log(err))
+    );
+    return;
+  }
+  event.respondWith(
+    fetch(event.request).catch(function() {
+      return caches.match(event.request).then(function(response) {
+        if (response) {
+          return response;
+        } else if (event.request.headers.get("accept").includes("text/html")) {
+          // return the cached home page for all requests for html pages
+          return caches.match("/");
+        }
+      });
     })
-);
-})
+  );
+});
