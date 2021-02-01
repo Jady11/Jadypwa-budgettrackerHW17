@@ -6,7 +6,6 @@ const iconFiles = iconSizes.map((size) => `/icons/icon-${size}x${size}.png`);
 
 const staticFilesToPreCache = [
     "/",
-    "/index.html",
     "/style.css",
     "/index.js",
     "/manifest.json",
@@ -22,24 +21,24 @@ self.addEventListener("install", function (event) {
         return cache.addAll(staticFilesToPreCache);
     })
     );
-    self.skipWaiting();
+    // self.skipWaiting();
 });
 
-self.addEventListener("activate", function (event) {
-    event.waitUntil(
-        caches.keys().then((keyList) => {
-        return Promise.all(
-            keylist.map((key) => {
-            if (key !== CACHE_NAME && KEY !== DATA_CACHE_NAME) {
-                console.log("Removing old cache data", key);
-                return caches.delete(key);
-            }
-            })
-        );
-        })
-    );
-    self.clients.claim();
-});
+// self.addEventListener("activate", function (event) {
+//     event.waitUntil(
+//         caches.keys().then((keyList) => {
+//         return Promise.all(
+//             keylist.map((key) => {
+//             if (key !== CACHE_NAME && KEY !== DATA_CACHE_NAME) {
+//                 console.log("Removing old cache data", key);
+//                 return caches.delete(key);
+//             }
+//             })
+//         );
+//         })
+//     );
+//     self.clients.claim();
+// });
 
 self.addEventListener("fetch", function(event) {
     
@@ -48,7 +47,7 @@ self.addEventListener("fetch", function(event) {
             caches.open(DATA_CACHE_NAME).then(cache => {
                 return fetch(event.request)
                 .then(res => {
-                    if(res.status === 2000) {
+                    if(res.status === 200) {
                         cache.put(event.request, response.clone());
                     }
                     return res;
